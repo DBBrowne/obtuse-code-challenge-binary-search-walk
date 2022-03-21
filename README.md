@@ -34,7 +34,7 @@ counts([1,2,3], [2,4])
 #### Performance
 A summary:
 - Node does respectably, excellent given how easy it is to use.
-- Python starts to struggle at the larger input sizes, but handles increases in the maximum score better han Node does, retaining similar execution times when each member of the input limit moves from 1e6 to 1e9.
+- Python starts to struggle at the larger input sizes, but handles increases in the maximum score better than Node does, retaining similar execution times when the limit on each member of the input moves from 1e6 to 1e9.
 - Rust is a compiled language, designed for speed, so dominates.  For a low level language, it is very easy to work with, with an excellent and extremely helpful compiler.
 > Obviously, execution speeds are hardware dependant.  
 > Trying to optimise execution time in Node, beyond choosing a better algorithm, is largely [an exercise in futility](https://gist.github.com/coolaj86/2310b00d6eebb3f752f4ca803f1423d1).  Execution times can vary widely following apparently unrelated changes in code which appear to modify how the v8 JIT decides to compile the code.
