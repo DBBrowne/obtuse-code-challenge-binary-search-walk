@@ -1,3 +1,5 @@
+mod fuzzy_bin_search;
+
 fn main() {
-    println!("Hello, world!");
+    fuzzy_bin_search::match_scores::match_scores()
 }
