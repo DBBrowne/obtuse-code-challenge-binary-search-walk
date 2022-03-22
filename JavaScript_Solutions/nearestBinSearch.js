@@ -223,6 +223,51 @@ function forCount(teamA, teamB) {
   return teamB
 }
 
+// https://stackoverflow.com/a/41956372/15995918
+function binarySearch(array, pred) {
+  let lo = -1, hi = array.length
+  while ((1 + lo) < hi) {
+    // Bitwise version of Math.floor((hi-lo) / 2)
+    const mi = lo + ((hi - lo) >> 1)
+    if (pred(array[mi])) {
+      hi = mi
+    } else {
+      lo = mi
+    }
+  }
+  return hi
+}
+function upperBound(array, item) {
+  return binarySearch(array, j => item < j)
+}
+
+function binaryCountMap(inputs, refs){
+  
+  inputs.sort(sortFn)
+
+  return refs.map(function(ref){
+    return upperBound(inputs, ref)
+  })
+}
+function binaryCount(inputs, refs){
+  const outputs = []
+  
+  inputs.sort(sortFn)
+
+  refs.forEach(function(ref){
+    outputs.push(
+      upperBound(inputs, ref)
+    )
+  })
+
+  return outputs
+}
+
+
+
+// ***************************************
+// *** Tests
+
 const tests = [
   {
     inputs: [1, 4, 2, 4],
@@ -251,8 +296,11 @@ const tests = [
 const functions = [
   duncanCount,
   forCount,
-  ajCount
+  ajCount,
+  binaryCount,
+  binaryCountMap
   // ajCountLeftAlloc2
+  // ajCountLeftAlloc3
 ]
 
 functions.forEach(function(fn){
@@ -314,7 +362,7 @@ const bench = [
   }
 ]
 
-const maxScores = 1e6
+const maxScores = 1e9
 function scoresGenerator(size) {
   const returnArray = []
 
@@ -330,8 +378,11 @@ const functionsToTime = [
   ajCountLeftAlloc,
   duncanCount,
   eachCount,
-  forCount
+  forCount,
+  binaryCount,
+  binaryCountMap
   // ajCountLeftAlloc2
+  // ajCountLeftAlloc3
 ]
 
 bench.forEach(function (sizes) {
@@ -350,3 +401,17 @@ bench.forEach(function (sizes) {
     console.timeEnd(fn.name)
   })
 })
+
+// function upperBound(array, item) {
+//   return binarySearch(array, j => item < j)
+// }
+// function lowerBound(array, item) {
+//   return binarySearch(array, j => item <= j)
+// }
+// const exampleTarget = 2
+// console.log(binarySearch(
+//   [1,2,4,4], 
+//   function(j){
+//     0 <= sortFn(j, 1)
+//   })
+// )
