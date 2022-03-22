@@ -1,6 +1,6 @@
 'use strict'
 
-function sortFn(a, b) {
+function compareAscending(a, b) {
   return a - b
 }
 
@@ -51,7 +51,7 @@ function ajCount(inputs, refs) {
 function ajCountLeftAlloc(inputs, refs) {
   const outputs = []
   // starts just a little to the right
-  inputs.sort(sortFn)
+  inputs.sort(compareAscending)
 
   refs.forEach(function (ref) {
     let left = 0
@@ -90,62 +90,46 @@ function ajCountLeftAlloc(inputs, refs) {
   return outputs
 }
 
-// eslint-disable-next-line no-unused-vars
-function ajCountLeftAlloc2(refs, inputs) {
+function binarySearchThenWalk(arr, x){
+  let left = 0
+  let right = arr.length
+  // let mid = left + Math.floor((right - left) / 2)
+
+  while (left <= right){
+    let mid = left + Math.floor((right - left) / 2)
+    
+    // Standard binary search would return mid here, if arr[mid] === x, 
+    // As we want to find the rightmost index if multiple equal values are sorted together, walk right from a  matching value until a non-matching is found.
+    if (x === arr[mid]) {
+      while (x === arr[mid + 1]){
+        mid++
+      }
+      return mid + 1
+    }
+    // If we're at the insert point for our target, return the .
+    if (arr[mid] < x && arr[mid + 1] > x){
+      return mid + 1
+    }
+
+    if (arr[mid] < x){
+      left = mid + 1
+    } else {
+      right = mid - 1
+    }
+  }
+  // target is great than greatest value in x, so return arr.length
+  return right + 1
+}
+
+function ajCount2(inputs, refs){
   const outputs = []
+  inputs.sort(compareAscending)
 
-  // starts just a little to the right
-  inputs.sort(sortFn)
-  
-  refs.forEach(function (ref) {
-    let left = 0
-    let right = inputs.length - 1
-    let i = left
-
-    // debug
-    // let count = 0
-
-    for (;;) {
-      // debug
-      // if (count > 10) {
-      // break
-      // }
-      // count += 1
-
-      const v = inputs[i]
-
-      // Move to the left
-      // (guarantee that it will move left if it can)
-      if (v > ref) {
-        right = i //- 1;
-        const j = left + Math.floor((i - left) / 2)
-        if (i === j) {
-          break
-        }
-        i = j
-        continue
-      }
-
-      // Move to the right
-      if (v <= ref) {
-        left = i
-        if (i === right) {
-          break
-        }
-        let j = i + Math.floor((right - i) / 2)
-        if (i === j) {
-          j += 1
-        }
-        i = j
-        continue
-      }
-    }
-    while (inputs[i] === inputs[i + 1] && i < inputs.length) {
-      i += 1
-    }
-    outputs.push(i + 1)
+  refs.forEach(function(ref){
+    outputs.push(
+      binarySearchThenWalk(inputs, ref)
+    )
   })
-
   return outputs
 }
 
@@ -154,8 +138,8 @@ function duncanCount(teamA, teamB) {
   const _teamB = [...teamB]
 
   // sort numerically
-  teamA.sort(sortFn)
-  _teamB.sort(sortFn)
+  teamA.sort(compareAscending)
+  _teamB.sort(compareAscending)
 
   const cache = {}
   let previousAIndex = 0
@@ -180,8 +164,8 @@ function eachCount(teamA, teamB) {
   const _teamB = teamB.slice(0)
 
   // sort numerically
-  teamA.sort(sortFn)
-  _teamB.sort(sortFn)
+  teamA.sort(compareAscending)
+  _teamB.sort(compareAscending)
 
   const cache = {}
   let previousAIndex = 0
@@ -205,8 +189,8 @@ function forCount(teamA, teamB) {
   const _teamB = teamB.slice(0)
 
   // sort numerically
-  teamA.sort(sortFn)
-  _teamB.sort(sortFn)
+  teamA.sort(compareAscending)
+  _teamB.sort(compareAscending)
 
   const cache = {}
   let previousAIndex = 0
@@ -223,6 +207,8 @@ function forCount(teamA, teamB) {
   return teamB
 }
 
+
+// * Binary Bound
 // https://stackoverflow.com/a/41956372/15995918
 function binarySearch(array, pred) {
   let lo = -1, hi = array.length
@@ -241,29 +227,36 @@ function upperBound(array, item) {
   return binarySearch(array, j => item < j)
 }
 
-function binaryCountMap(inputs, refs){
-  
-  inputs.sort(sortFn)
+function binarySearchBounds(inputs, refs){
+  inputs.sort(compareAscending)
 
   return refs.map(function(ref){
     return upperBound(inputs, ref)
   })
 }
-function binaryCount(inputs, refs){
-  const outputs = []
-  
-  inputs.sort(sortFn)
 
-  refs.forEach(function(ref){
-    outputs.push(
-      upperBound(inputs, ref)
-    )
-  })
+// * BinaryBoundsDirect
+function binaryUpperBound(arr, x){
+  let left = -1
+  let right = arr.length
 
-  return outputs
+  while ((1 + left) < right){
+    const mid = left + Math.floor((right - left) / 2)
+    if (x < arr[mid]){
+      right = mid
+    } else {
+      left = mid
+    }
+  }
+  return right
 }
+function binaryBoundMap(inputs, refs){
+  inputs.sort(compareAscending)
 
-
+  return refs.map(function(ref){
+    return binaryUpperBound(inputs, ref)
+  })
+}
 
 // ***************************************
 // *** Tests
@@ -297,10 +290,9 @@ const functions = [
   duncanCount,
   forCount,
   ajCount,
-  binaryCount,
-  binaryCountMap
-  // ajCountLeftAlloc2
-  // ajCountLeftAlloc3
+  ajCount2,
+  binarySearchBounds,
+  binaryBoundMap
 ]
 
 functions.forEach(function(fn){
@@ -319,8 +311,8 @@ functions.forEach(function(fn){
 
 console.log('AJ reversed inputs');
 [
-  ajCount
-  // ajCountLeftAlloc2
+  ajCount,
+  ajCountLeftAlloc
 ].forEach(function (fn) {
   console.info(fn.name)
   tests.forEach(function (test) {
@@ -376,13 +368,12 @@ function scoresGenerator(size) {
 const functionsToTime = [
   ajCount,
   ajCountLeftAlloc,
+  ajCount2,
   duncanCount,
   eachCount,
   forCount,
-  binaryCount,
-  binaryCountMap
-  // ajCountLeftAlloc2
-  // ajCountLeftAlloc3
+  binarySearchBounds,
+  binaryBoundMap
 ]
 
 bench.forEach(function (sizes) {
@@ -401,17 +392,3 @@ bench.forEach(function (sizes) {
     console.timeEnd(fn.name)
   })
 })
-
-// function upperBound(array, item) {
-//   return binarySearch(array, j => item < j)
-// }
-// function lowerBound(array, item) {
-//   return binarySearch(array, j => item <= j)
-// }
-// const exampleTarget = 2
-// console.log(binarySearch(
-//   [1,2,4,4], 
-//   function(j){
-//     0 === sortFn(exampleTarget, j)
-//   })
-// )
