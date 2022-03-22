@@ -1,5 +1,5 @@
 [package]
-name = "obtuse_interview_fuzzy_binary"
+name = "obtuse_interview_bounded_bin_search"
 version = "0.1.0"
 edition = "2021"
 
