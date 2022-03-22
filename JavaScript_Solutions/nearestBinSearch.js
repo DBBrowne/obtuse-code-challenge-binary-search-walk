@@ -4,7 +4,7 @@ function sortFn(a, b) {
   return a - b
 }
 
-function ajCount(refs, inputs) {
+function ajCount(inputs, refs) {
   const outputs = []
 
   // starts just a little to the right
@@ -48,7 +48,7 @@ function ajCount(refs, inputs) {
   return outputs
 }
 
-function ajCountLeftAlloc(refs, inputs) {
+function ajCountLeftAlloc(inputs, refs) {
   const outputs = []
   // starts just a little to the right
   inputs.sort(sortFn)
@@ -412,6 +412,6 @@ bench.forEach(function (sizes) {
 // console.log(binarySearch(
 //   [1,2,4,4], 
 //   function(j){
-//     0 <= sortFn(j, 1)
+//     0 === sortFn(exampleTarget, j)
 //   })
 // )
