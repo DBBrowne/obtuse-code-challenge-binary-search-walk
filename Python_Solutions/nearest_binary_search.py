@@ -50,7 +50,7 @@ def binary_search(array, pred):
 def upper_bound(array, target):
     return binary_search(array, lambda j: target < j)
 
-def count_binary_bounds(inputs, refs):
+def binary_bounds_count(inputs, refs):
     inputs.sort()
 
     for index, score in enumerate(refs):
@@ -134,7 +134,7 @@ tests = [
 functions_test = [
     counts,
     counts_sort_walk,
-    count_binary_bounds,
+    binary_bounds_count,
     aj_count_extended
 ]
 
@@ -201,7 +201,7 @@ bench = [
 
 functions = [
     counts_sort_walk,
-    count_binary_bounds,
+    binary_bounds_count,
     aj_count_extended
 ]
 

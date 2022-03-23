@@ -67,7 +67,7 @@ fn upper_bound(arr: &Vec<u32>, target:u32)->usize{
     &predicate
   )
 }
-fn count_binary_search(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
+fn binary_bounds_count(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
   inputs.sort_unstable();
 
   refs.into_iter().map(|r| {
@@ -164,7 +164,7 @@ pub fn match_scores_tests() {
 
   let functions:[&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>; 3] = [
     &counts_sort_walk,
-    &count_binary_search,
+    &binary_bounds_count,
     &count_find_then_walk,
   ];
   let function_labels: [String;3] = [

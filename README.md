@@ -41,12 +41,12 @@ A summary:
 
 > 23/03/22 : There must be an error in the binary search implementations in python and rust.  I currently have COVID, so have probably missed something obvious.
 
-|Algo|Input Length||Python|JS / Node|Rust|
-|---|---:|---|---:|---:|---:|
+|Algo|Input Length||Python|JS / Node|Rust||
+|---|---:|---|---:|---:|---:|---:|
 |naive Count|10_000||2216ms|928ms|7ms|
-|sort then walk|10_000||3.6ms|6.0ms|0.85ms|
-|Binary S then Walk|10_000||19ms|4.2ms|0.7ms|
-|Binary Boundary|10_000||19ms|4.0ms|0.8ms|
+|sort then walk|10_000||3.6ms|6.0ms|0.85ms|duncanCount|
+|Binary S then Walk|10_000||19ms|4.2ms|0.7ms|ajCount|
+|Binary Boundary|10_000||19ms|4.0ms|0.8ms|binaryBoundsCount|
 |
 |naive Count|100_000||--|~70 s|742ms|
 |sort then walk|100_000||57ms|62ms|8.6ms|

@@ -170,7 +170,7 @@ function binarySearch(array, pred) {
 function upperBound(array, target) {
   return binarySearch(array, j => target < j)
 }
-function binarySearchBounds(inputs, refs){
+function binaryBoundsCount(inputs, refs){
   inputs.sort(compareAscending)
 
   return refs.map(function(ref){
@@ -210,7 +210,7 @@ const functions = [
   duncanCount,
   ajCount,
   ajCountExtended,
-  binarySearchBounds
+  binaryBoundsCount
 ]
 
 functions.forEach(function(fn){
@@ -271,7 +271,7 @@ const functionsToTime = [
   ajCountLeftAlloc,
   ajCount,
   ajCountExtended,
-  binarySearchBounds
+  binaryBoundsCount
 ]
 
 bench.forEach(function (sizes) {
