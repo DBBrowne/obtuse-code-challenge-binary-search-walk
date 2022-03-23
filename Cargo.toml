@@ -5,5 +5,9 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.release]
+# Reduces bin from 3mb (!!!) to 300kb (still !!! but not so terrible), at the cost of less debug functionality.
+strip = true  # Automatically strip symbols from the binary.
+
 [dependencies]
 rand = "0.8.5"

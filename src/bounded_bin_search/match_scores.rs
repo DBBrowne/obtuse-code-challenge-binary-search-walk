@@ -3,18 +3,7 @@ use std::time::Instant;
 use std::collections::HashMap;
 
 const MAX_SCORE:u32 = 1e9 as  u32;
-//const MAX_MATCHES:usize = 1e6 as usize;
-
-
-fn scores_generator(size: usize)-> Vec<u32>{
-  let mut rng = rand::thread_rng();
-
-  let mut array : Vec<u32> = Vec::with_capacity(size);
-  for _ in 0..array.capacity() {
-    array.push(rng.gen_range(0..MAX_SCORE));
-  }
-  array
-}
+const MAX_MATCHES:u32 = 1e6 as u32;
 
 fn counts(team_a: Vec<u32>, team_b:Vec<u32>)->Vec<u32>{
   let mut output : Vec<u32> = Vec::with_capacity(team_b.len());
@@ -55,18 +44,108 @@ fn counts_sort_walk(mut team_a: Vec<u32>, mut team_b:Vec<u32>)->Vec<u32>{
   team_b
 }
 
+fn binary_search_u32(
+  arr:&Vec<u32>, 
+  pred: &dyn Fn(u32)->bool,
+)->usize{
+  let mut left:i32 = -1;
+  let mut right:i32 = arr.len() as i32;
+  while (1+left) < right {
+    let mid: i32 = left + ((right -left) >> 1);
+    if pred(arr[mid as usize]) {
+      right = mid
+    } else {
+      left = mid
+    }
+  }
+  right as usize
+}
+fn upper_bound(arr: &Vec<u32>, target:u32)->usize{
+  let predicate = |j|{target < j};
+  binary_search_u32(
+    &arr, 
+    &predicate
+  )
+}
+fn count_binary_search(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
+  inputs.sort_unstable();
+
+  refs.into_iter().map(|r| {
+    upper_bound(&inputs, r)  as u32
+  }).collect::<Vec<u32>>()
+}
+
+fn binary_search_insert_u32(
+  arr: &Vec<u32>,
+  target: u32,
+  pred: &dyn Fn(u32, u32)->i64,
+)-> i64 {
+  let mut left: i64 = 0;
+  let mut right: i64 = arr.len() as i64 - 1;
+  while left <= right {
+    let mid = left + ((right-left) >>1);
+    let cmp = pred(target, arr[mid as usize]);
+
+    if cmp>0 {
+      left = mid + 1;
+    } else if cmp<0{
+      right = mid -1;
+    } else{
+      return mid
+    }
+  };
+
+  -(right)-1
+}
+fn binary_find_then_walk(arr: &Vec<u32>, target: u32)->u32{
+  let predicate = |t, el| {t as i64 - el as i64};
+  let arr_length = arr.len() as i64;
+  let mut index:i64 = binary_search_insert_u32(
+    arr,
+    target,
+    &predicate
+  );
+
+  if index < 0 {
+    return -index as u32
+  };
+  while target == arr[index as usize] && index < arr_length{
+    index = index +1
+  };
+
+  index as u32
+}
+fn count_find_then_walk(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
+  inputs.sort_unstable();
+
+  refs.into_iter().map(|r| {
+    binary_find_then_walk(&inputs, r)
+  }).collect::<Vec<u32>>()
+}
+
+
 fn timer(
   fnc:&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>,
-  size: usize,
-  label:String
+  inputs: Vec<u32>,
+  refs: Vec<u32>,
+  label: String
 ){
-  let team_a = scores_generator(size);
-  let team_b = scores_generator(size);
-
   let now = Instant::now();
-  fnc(team_a, team_b);
-  let end = now.elapsed().as_micros() as f64;
+  fnc(inputs, refs);
+  let end = now.elapsed().as_micros() as f32;
   println!("{}: {}ms",label,  end/1000.0);
+}
+
+// ****************************************************
+
+fn scores_generator(size: usize)-> Vec<u32>{
+  let mut rng = rand::thread_rng();
+
+  let mut array : Vec<u32> = Vec::with_capacity(size);
+  for _ in 0..array.capacity() {
+    array.push(rng.gen_range(0..MAX_SCORE));
+  }
+  array
 }
 
 struct TestScenario{
@@ -74,8 +153,26 @@ struct TestScenario{
   refs: Vec<u32>,
   expected: Vec<u32>,
 }
+#[derive(Debug)]
+struct BulkTest{
+  inputs: usize,
+  refs: usize,
+}
 
-pub fn match_scores() {
+pub fn match_scores_tests() {
+  let mut rng = rand::thread_rng();
+
+  let functions:[&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>; 3] = [
+    &counts_sort_walk,
+    &count_binary_search,
+    &count_find_then_walk,
+  ];
+  let function_labels: [String;3] = [
+    String::from("counts_sort_walk"),
+    String::from("count_binary_bounds"),
+    String::from("binary_find_then_walk"),
+  ];
+
   let scenarios:Vec<TestScenario> = vec![
     TestScenario {
       inputs: vec![1, 4, 2, 4],
@@ -101,6 +198,33 @@ pub fn match_scores() {
     }
   ];
 
+  let bench:Vec<BulkTest> = vec![
+    BulkTest{
+      inputs:10_000,
+      refs:  10_000,
+    },
+    BulkTest{
+      inputs:100_000,
+      refs:  100_000,
+    },
+    BulkTest{
+      inputs:1_000_000,
+      refs:  1_000_000,
+    },
+    BulkTest{
+      inputs:10_000_000,
+      refs:  10_000_000,
+    },
+    BulkTest{
+      inputs: rng.gen_range(0..MAX_MATCHES) as usize,
+      refs:rng.gen_range(0..MAX_MATCHES) as usize,
+    },
+    BulkTest{
+      inputs:rng.gen_range(0..MAX_MATCHES) as usize,
+      refs:rng.gen_range(0..MAX_MATCHES) as usize,
+    },
+  ];
+
   let mut now = Instant::now();
   scores_generator(100_000);
   let mut end = now.elapsed().as_micros() as f64;
@@ -112,16 +236,44 @@ pub fn match_scores() {
 
   for scenario in scenarios{
     println!("Asserting: {:?}, {:?}, Expected: {:?}", scenario.inputs, scenario.refs, scenario.expected);
-    assert_eq!(counts(scenario.inputs.to_vec(), scenario.refs.to_vec()), scenario.expected);
-    assert_eq!(counts_sort_walk(scenario.inputs.to_vec(), scenario.refs.to_vec()), scenario.expected);
+    for function in functions{
+      assert_eq!(function(scenario.inputs.to_vec(), scenario.refs.to_vec()), scenario.expected);
+    }
   }
-
-  timer(&counts, 10_000, "counts 10k".to_string());
-  timer(&counts_sort_walk, 10_000, "fast 10k".to_string());
-
-  timer(&counts, 100_000, "counts 100k".to_string());
-  timer(&counts_sort_walk, 100_000, "fast 100k".to_string());
+  println!();
+  timer(
+    &counts,
+    scores_generator(1_000),
+    scores_generator(1_000),
+    String::from("counts 1k"),
+  );
+  timer(
+    &counts,
+    scores_generator(10_000),
+    scores_generator(10_000),
+    String::from("counts 10k"),
+  );
+  timer(
+    &counts,
+    scores_generator(100_000),
+    scores_generator(100_000),
+    String::from("counts 100k"),
+  );
   
-  timer(&counts_sort_walk, 1_000_000, "fast 1m".to_string());
-  timer(&counts_sort_walk, 10_000_000, "fast 10m".to_string());
+  for scenario in bench{
+    println!();
+    println!("{:?}",scenario);
+
+    let inputs = scores_generator(scenario.inputs);
+    let refs = scores_generator(scenario.refs);
+
+    for (index, func) in functions.iter().enumerate() {
+      timer(
+        &func,
+        inputs.to_vec(),
+        refs.to_vec(),
+        String::from(&function_labels[index]),
+      )
+    }
+  }
 }
