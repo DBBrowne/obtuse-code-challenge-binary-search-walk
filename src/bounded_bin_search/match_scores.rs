@@ -152,11 +152,13 @@ fn count_with_builtin(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
 
 // * Partition
 fn counts_partition(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
+  let mut output : Vec<u32> = Vec::with_capacity(refs.len());
   inputs.sort_unstable();
 
-  refs.into_iter().map(|r| {
-    inputs.partition_point(|&el| el <= r) as u32
-  }).collect::<Vec<u32>>()
+  for r in refs{
+    output.push(inputs.partition_point(|&el| el <= r) as u32)
+  };
+  output
 }
 
 
