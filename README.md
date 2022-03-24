@@ -4,14 +4,15 @@
 - [Obtuse technical tests - "football" scores](#title-link)
 - [Intro](#intro)
   - [Performance](#performance)
+  - [Solutions](#solutions)
 - [Usage](#usage)
 - [Running Tests](#running-tests)
-- [Known Isues](#known-issues)
+- [Known Issues](#known-issues)
 
 ### Intro
 This project came from an obtuse interview question.  After failing the initial 1 hour test, I worked through the "sort-then-walk" solutions in JS and Python about another 1.5-2 hours.
 
-A better solution, using a fuzzy binary search exists however, which is much faster than my attempt.
+A better solution, using a binary search exists however, which is much faster than my attempt.
 
 Although obfuscated by language about leagues with 10^5 matches and football games with scores up to 10^9, the question was fundamentally:
 
@@ -34,10 +35,12 @@ counts([1,2,3], [2,4])
 #### Performance
 A summary:
 - Node does respectably, excellent given how easy it is to use.
-- Python starts to struggle at the larger input sizes, but handles increases in the maximum score better than Node does, retaining similar execution times when the limit on each member of the input moves from 1e6 to 1e9.
+- Python is admirably fast with small data sets, but starts to struggle at the larger input sizes.
 - Rust is a compiled language, designed for speed, so dominates.  For a low level language, it is very easy to work with, with an excellent and extremely helpful compiler.
 > Obviously, execution speeds are hardware dependant.  
 > Trying to optimise execution time in Node, beyond choosing a better algorithm, is largely [an exercise in futility](https://gist.github.com/coolaj86/2310b00d6eebb3f752f4ca803f1423d1).  Execution times can vary widely following apparently unrelated changes in code which appear to modify how the v8 JIT decides to compile the code.
+
+> There's a good argument that we should not be mutating the inputs in any of these solutions, but instead creating local copies of the sorted arrays in each case.  There original question made no specification here, so as long as we're consistent, sorting the original array is deemed acceptable as the point here is to compare solutions.
 
 > 23/03/22 : There must be an error in the binary search implementations in python and rust.  I currently have COVID, so have probably missed something obvious.
 
@@ -47,22 +50,23 @@ A summary:
 |sort then walk|10_000||3.6ms|6.0ms|0.85ms|duncanCount|
 |Binary S then Walk|10_000||19ms|4.2ms|0.7ms|ajCount|
 |Binary Boundary|10_000||19ms|4.0ms|0.8ms|binaryBoundsCount|
-|
+|||||
 |naive Count|100_000||--|~70 s|742ms|
 |sort then walk|100_000||57ms|62ms|8.6ms|
 |Binary S then Walk|100_000||270ms|37ms|9.7ms|
 |Binary Boundary|100_000||260ms|29.5ms|9.3ms|
-|
+||||||
 |sort then walk|1_000_000||946ms|795ms|127ms|
 |Binary S then Walk|1_000_000||3632ms|492ms|133ms|
 |Binary Boundary|1_000_000||3632ms|407ms|130ms|
-|
+||||||
 |sort then walk|10_000_000||11,031ms|9126ms|1711ms|
 |Binary S then Walk|10_000_000||46,000ms|7213ms|2700ms|
 |Binary Boundary|10_000_000||46,000ms|6080s|2710ms|
-|
+||||||
 
 
+#### Solutions
 Performance became an interesting part of this problem and, as I had already built simple solutions in JavaScript and Python, this seemed like a good opportunity to engage with my first statically typed language.  So, there are implementations of each potential solution in:
 - [JS/Node](https://github.com/DBBrowne/obtuse-code-challenge-fuzzy-binary-search/blob/main/JavaScript_Solutions/nearestBinSearch.js)
 - [Python](https://github.com/DBBrowne/obtuse-code-challenge-fuzzy-binary-search/blob/main/Python_Solutions/nearest_binary_search.py)
@@ -92,7 +96,7 @@ The simple, naive implementations is:
 This solution has O(N^2) scaling however. As we move above input lengths of 10_000, this becomes completely unmanageable.
 
 I didn't realise that this was a binary-search problem, or that binary-search would be fast enough to avoid the need to sort both arrays, so sought to reduce the scaling in other ways.
-Sorting the inputs, then walking through them offered the opportunity to reduce complexity to O(2logN + 2N) = O(N).  A great improvement,  but still much slower than a fuzzy binary search.
+Sorting the inputs, then walking through them offered the opportunity to reduce complexity to O(2logN + 2N) = O(N).  A great improvement,  but still much slower than a binary search.
 
 In more detail:
 - Copy `inputB` (so we can sort but still retain order)
@@ -141,6 +145,7 @@ function binarySearchBounds(inputs, refs){
 ```
 
 ### Usage
+#### Rust
 Install Rust if necessary. Webi offers the easiest, most reliable way to do this: https://webinstall.dev/rustlang/
 
 ```console
@@ -154,6 +159,15 @@ cargo build --release
 >>>
 <Assertions>      // will panic if failing
 <Execution times> // for different functions and input scales, from 10k to 10m.
+```
+#### JavaScript
+```console
+node ./JavaScript_Solutions/nearestBinSearch.js
+```
+
+#### Python
+```console
+python3 ./Python_Solutions/nearest_binary_search.py
 ```
 
 ### Running Tests
