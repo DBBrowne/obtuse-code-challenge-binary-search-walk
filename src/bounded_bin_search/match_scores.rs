@@ -150,6 +150,15 @@ fn count_with_builtin(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
   }).collect::<Vec<u32>>()
 }
 
+// * Partition
+fn counts_partition(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
+  inputs.sort_unstable();
+
+  refs.into_iter().map(|r| {
+    inputs.partition_point(|&el| el <= r) as u32
+  }).collect::<Vec<u32>>()
+}
+
 
 // ****************************************************
 // *** Tests
@@ -190,17 +199,19 @@ struct BulkTest{
 pub fn match_scores_tests() {
   let mut rng = rand::thread_rng();
 
-  let functions:[&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>; 4] = [
+  let functions:[&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>; 5] = [
     &counts_sort_walk,
     &binary_bounds_count,
     &count_find_then_walk,
-    &count_with_builtin
+    &count_with_builtin,
+    &counts_partition
   ];
-  let function_labels: [String;4] = [
+  let function_labels: [String;5] = [
     String::from("counts_sort_walk"),
     String::from("count_binary_bounds"),
     String::from("count_find_then_walk"),
     String::from("count_with_builtin"),
+    String::from("count_partition"),
   ];
 
   let scenarios:Vec<TestScenario> = vec![
