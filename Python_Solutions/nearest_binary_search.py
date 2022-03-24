@@ -99,11 +99,12 @@ def upper_bound(array, target):
 
 def binary_bounds_count(inputs, refs):
     inputs.sort()
+    outputs = []
 
-    for index, score in enumerate(refs):
-        refs[index] = upper_bound(inputs, score)
+    for score in refs:
+        outputs.push(upper_bound(inputs, score))
 
-    return refs
+    return outputs
 
 
 # ************************************************
