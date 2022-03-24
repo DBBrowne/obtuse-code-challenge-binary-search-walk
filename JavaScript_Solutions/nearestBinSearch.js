@@ -114,6 +114,8 @@ function ajCount(inputs, refs){
   return outputs
 }
 
+// * Binary Search with negative insertion index if not found
+// https://stackoverflow.com/a/29018745/15995918
 function binaryFindOrInsertionIndex(arr, target, compareFn = (t, el) => t - el) {
   // Returns 0 if target found at arr[0].  
   // Returns -(indexToInsert) if target is not found

@@ -33,31 +33,8 @@ def counts_sort_walk(teamA, teamB):
 
     return teamB
 
-
-def binary_search(array, pred):
-    left = -1
-    right = len(array)
-
-    while((1+left) < right):
-        mid = left + ((right - left) >> 1)
-        if pred(array[mid]):
-            right = mid
-        else:
-            left = mid
-
-    return right
-
-def upper_bound(array, target):
-    return binary_search(array, lambda j: target < j)
-
-def binary_bounds_count(inputs, refs):
-    inputs.sort()
-
-    for index, score in enumerate(refs):
-        refs[index] = upper_bound(inputs, score)
-
-    return refs
-
+# * Binary Search with negative insertion index if not found
+# https://stackoverflow.com/a/29018745/15995918
 def binary_find_or_insertion_index(
     arr,
     target,
@@ -100,7 +77,31 @@ def aj_count_extended(inputs, refs):
 
     return refs
 
+# * Binary Bound
+# https://stackoverflow.com/a/41956372/15995918
+def binary_search(array, pred):
+    left = -1
+    right = len(array)
 
+    while((1+left) < right):
+        mid = left + ((right - left) >> 1)
+        if pred(array[mid]):
+            right = mid
+        else:
+            left = mid
+
+    return right
+
+def upper_bound(array, target):
+    return binary_search(array, lambda j: target < j)
+
+def binary_bounds_count(inputs, refs):
+    inputs.sort()
+
+    for index, score in enumerate(refs):
+        refs[index] = upper_bound(inputs, score)
+
+    return refs
 
 
 # ************************************************

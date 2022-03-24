@@ -44,37 +44,8 @@ fn counts_sort_walk(mut team_a: Vec<u32>, mut team_b:Vec<u32>)->Vec<u32>{
   team_b
 }
 
-fn binary_search_u32(
-  arr:&Vec<u32>, 
-  pred: &dyn Fn(u32)->bool,
-)->usize{
-  let mut left:i32 = -1;
-  let mut right:i32 = arr.len() as i32;
-  while (1+left) < right {
-    let mid: i32 = left + ((right -left) >> 1);
-    if pred(arr[mid as usize]) {
-      right = mid
-    } else {
-      left = mid
-    }
-  }
-  right as usize
-}
-fn upper_bound(arr: &Vec<u32>, target:u32)->usize{
-  let predicate = |j|{target < j};
-  binary_search_u32(
-    &arr, 
-    &predicate
-  )
-}
-fn binary_bounds_count(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
-  inputs.sort_unstable();
-
-  refs.into_iter().map(|r| {
-    upper_bound(&inputs, r)  as u32
-  }).collect::<Vec<u32>>()
-}
-
+// * Binary Search with negative insertion index if not found
+// https://stackoverflow.com/a/29018745/15995918
 fn binary_search_insert_u32(
   arr: &Vec<u32>,
   target: u32,
@@ -123,6 +94,41 @@ fn count_find_then_walk(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
   }).collect::<Vec<u32>>()
 }
 
+// * Binary Bound
+// https://stackoverflow.com/a/41956372/15995918
+fn binary_search_u32(
+  arr:&Vec<u32>, 
+  pred: &dyn Fn(u32)->bool,
+)->usize{
+  let mut left:i32 = -1;
+  let mut right:i32 = arr.len() as i32;
+  while (1+left) < right {
+    let mid: i32 = left + ((right -left) >> 1);
+    if pred(arr[mid as usize]) {
+      right = mid
+    } else {
+      left = mid
+    }
+  }
+  right as usize
+}
+fn upper_bound(arr: &Vec<u32>, target:u32)->usize{
+  let predicate = |j|{target < j};
+  binary_search_u32(
+    &arr, 
+    &predicate
+  )
+}
+fn binary_bounds_count(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
+  inputs.sort_unstable();
+
+  refs.into_iter().map(|r| {
+    upper_bound(&inputs, r)  as u32
+  }).collect::<Vec<u32>>()
+}
+
+// ****************************************************
+// *** Tests
 
 fn timer(
   fnc:&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>,
@@ -135,8 +141,6 @@ fn timer(
   let end = now.elapsed().as_micros() as f32;
   println!("{}: {}ms",label,  end/1000.0);
 }
-
-// ****************************************************
 
 fn scores_generator(size: usize)-> Vec<u32>{
   let mut rng = rand::thread_rng();
