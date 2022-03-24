@@ -47,7 +47,8 @@ def binary_find_or_insertion_index(
     left = 0
     right = len(arr)-1
     while left <= right:
-        mid = (right + left) >> 1
+        # Bitshift version of Math.floor((hi-lo) / 2)
+        mid = left + ((right - left) >> 1)
         cmp = compare(target, arr[mid])
         if cmp>0 :
             left = mid + 1
@@ -84,6 +85,7 @@ def binary_search(array, pred):
     right = len(array)
 
     while((1+left) < right):
+        # Bitshift version of Math.floor((hi-lo) / 2)
         mid = left + ((right - left) >> 1)
         if pred(array[mid]):
             right = mid

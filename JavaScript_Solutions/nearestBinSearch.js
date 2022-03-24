@@ -122,7 +122,8 @@ function binaryFindOrInsertionIndex(arr, target, compareFn = (t, el) => t - el) 
   var left = 0
   var right = arr.length - 1
   while (left <= right) {
-    var mid = (right + left) >> 1
+    // Bitshift version of Math.floor((hi-lo) / 2)
+    var mid = left + ((right - left) >> 1)
     var cmp = compareFn(target, arr[mid])
     if (cmp > 0) {
       left = mid + 1
@@ -156,7 +157,7 @@ function binarySearch(array, pred) {
   let left = -1
   let right = array.length
   while ((1 + left) < right) {
-    // Bitwise version of Math.floor((hi-lo) / 2)
+    // Bitshift version of Math.floor((hi-lo) / 2)
     const mid = left + ((right - left) >> 1)
     if (pred(array[mid])) {
       right = mid

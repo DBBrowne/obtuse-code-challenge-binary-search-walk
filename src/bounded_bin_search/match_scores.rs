@@ -103,6 +103,7 @@ fn binary_search_u32(
   let mut left:i32 = -1;
   let mut right:i32 = arr.len() as i32;
   while (1+left) < right {
+    // Bitshift version of Math.floor((hi-lo) / 2)
     let mid: i32 = left + ((right -left) >> 1);
     if pred(arr[mid as usize]) {
       right = mid
