@@ -128,6 +128,31 @@ fn binary_bounds_count(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
   }).collect::<Vec<u32>>()
 }
 
+// * Use Rust built in binary search
+fn binary_builtin_then_walk(arr: &Vec<u32>, target: u32)->u32{
+  // let predicate = |t, el| {t as i32 - el as i32};
+  // let arr_length = arr.len() as i32;
+  match arr.binary_search(&target){
+    Ok(mut i) =>{
+      while arr[i] == target {
+        i = i+1
+      }
+      return i as u32
+    },
+    Err(i) =>{
+      return i as u32
+    }
+  }
+}
+fn count_with_builtin(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
+  inputs.sort_unstable();
+
+  refs.into_iter().map(|r| {
+    binary_builtin_then_walk(&inputs, r)
+  }).collect::<Vec<u32>>()
+}
+
+
 // ****************************************************
 // *** Tests
 
@@ -167,15 +192,17 @@ struct BulkTest{
 pub fn match_scores_tests() {
   let mut rng = rand::thread_rng();
 
-  let functions:[&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>; 3] = [
+  let functions:[&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>; 4] = [
     &counts_sort_walk,
     &binary_bounds_count,
     &count_find_then_walk,
+    &count_with_builtin
   ];
-  let function_labels: [String;3] = [
+  let function_labels: [String;4] = [
     String::from("counts_sort_walk"),
     String::from("count_binary_bounds"),
-    String::from("binary_find_then_walk"),
+    String::from("count_find_then_walk"),
+    String::from("count_with_builtin"),
   ];
 
   let scenarios:Vec<TestScenario> = vec![
