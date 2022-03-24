@@ -15,14 +15,12 @@ function duncanCount(teamA, teamB) {
   const cache = {}
   let previousAIndex = 0
 
-  _teamB.reduce((previousMatches, score) => {
+  _teamB.forEach(score => {
     while (teamA[previousAIndex] <= score) {
-      previousMatches++
       previousAIndex++
     }
-    cache[score] = previousMatches
-    return previousMatches
-  }, 0)
+    cache[score] = previousAIndex
+  })
 
   teamB.forEach((score, i) => {
     teamB[i] = cache[score]
