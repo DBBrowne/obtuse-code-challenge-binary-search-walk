@@ -20,9 +20,9 @@ fn counts(team_a: Vec<u32>, team_b:Vec<u32>)->Vec<u32>{
   output
 }
 
-fn counts_sort_walk(mut team_a: Vec<u32>, mut team_b:Vec<u32>)->Vec<u32>{
-  team_a.sort_unstable();
-  let mut _tb = team_b.to_vec();
+fn counts_sort_walk(mut inputs: Vec<u32>, mut refs:Vec<u32>)->Vec<u32>{
+  inputs.sort_unstable();
+  let mut _tb = refs.to_vec();
   _tb.sort_unstable();
   let mut cache = HashMap::new();
   cache.insert(_tb[0], 0);
@@ -30,18 +30,18 @@ fn counts_sort_walk(mut team_a: Vec<u32>, mut team_b:Vec<u32>)->Vec<u32>{
 
   for b in _tb{
     while
-      team_a.len() > previous_a_index && 
-      &team_a[previous_a_index] <= &b
+      inputs.len() > previous_a_index && 
+      &inputs[previous_a_index] <= &b
     {
       previous_a_index = previous_a_index + 1;
     };
     cache.insert(b, previous_a_index as u32);
   };
   
-  for b in &mut team_b{
-    *b = cache[&*b];
+  for r in &mut refs{
+    *r = cache[&*r];
   };
-  team_b
+  refs
 }
 
 // * Binary Search with negative insertion index if not found
@@ -130,8 +130,6 @@ fn binary_bounds_count(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
 
 // * Use Rust built in binary search
 fn binary_builtin_then_walk(arr: &Vec<u32>, target: u32)->u32{
-  // let predicate = |t, el| {t as i32 - el as i32};
-  // let arr_length = arr.len() as i32;
   match arr.binary_search(&target){
     Ok(mut i) =>{
       while arr[i] == target {
