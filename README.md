@@ -1,7 +1,8 @@
-# Obtuse technical tests - "football" scores<a id="title-link>"></a>
+<!----><a name="title_link"></a>
+# Obtuse technical tests - "football" scores
 
 ## Contents
-- [Obtuse technical tests - "football" scores](#title-link)
+- [Obtuse technical tests - "football" scores](#title_link)
 - [Intro](#intro)
   - [Performance](#performance)
   - [Solutions](#solutions)
@@ -96,7 +97,7 @@ The simple, naive implementations is:
 This solution has O(N^2) scaling however. As we move above input lengths of 10_000, this becomes completely unmanageable.
 
 I didn't realise that this was a binary-search problem, or that binary-search would be fast enough to avoid the need to sort both arrays, so sought to reduce the scaling in other ways.
-Sorting the inputs, then walking through them offered the opportunity to reduce complexity to O(2logN + 2N) = O(N).  A great improvement,  but still much slower than a binary search.
+Sorting the inputs, then walking through them offered the opportunity to reduce complexity to O(2NlogN + 2N) = O(NlogN).  A great improvement,  but still much slower than a binary search.
 
 In more detail:
 - Copy `inputB` (so we can sort but still retain order)
