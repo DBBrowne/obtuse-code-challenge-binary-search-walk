@@ -78,10 +78,10 @@ fn binary_bounds_count(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
 fn binary_search_insert_u32(
   arr: &Vec<u32>,
   target: u32,
-  pred: &dyn Fn(u32, u32)->i64,
-)-> i64 {
-  let mut left: i64 = 0;
-  let mut right: i64 = arr.len() as i64 - 1;
+  pred: &dyn Fn(u32, u32)->i32,
+)-> i32 {
+  let mut left: i32 = 0;
+  let mut right: i32 = arr.len() as i32 - 1;
   while left <= right {
     let mid = left + ((right-left) >>1);
     let cmp = pred(target, arr[mid as usize]);
@@ -98,9 +98,9 @@ fn binary_search_insert_u32(
   -(right)-1
 }
 fn binary_find_then_walk(arr: &Vec<u32>, target: u32)->u32{
-  let predicate = |t, el| {t as i64 - el as i64};
-  let arr_length = arr.len() as i64;
-  let mut index:i64 = binary_search_insert_u32(
+  let predicate = |t, el| {t as i32 - el as i32};
+  let arr_length = arr.len() as i32;
+  let mut index:i32 = binary_search_insert_u32(
     arr,
     target,
     &predicate

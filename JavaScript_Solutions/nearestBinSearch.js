@@ -114,7 +114,7 @@ function ajCount(inputs, refs){
   return outputs
 }
 
-function binaryFindIndexOrInsertionIndex(arr, target, compareFn = (t, el) => t - el) {
+function binaryFindOrInsertionIndex(arr, target, compareFn = (t, el) => t - el) {
   // Returns 0 if target found at arr[0].  
   // Returns -(indexToInsert) if target is not found
   var left = 0
@@ -132,23 +132,20 @@ function binaryFindIndexOrInsertionIndex(arr, target, compareFn = (t, el) => t -
   }
   return -right - 1
 }
-function binaryFindThenWalk(arr, x){
-  let index = binaryFindIndexOrInsertionIndex(arr, x)
+function binaryFindThenWalk(arr, target){
+  let index = binaryFindOrInsertionIndex(arr, target)
   if (index < 0) return -index
 
-  while (x === arr[index]) index++
+  while (target === arr[index]) index++
   return index
 }
 function ajCountExtended(inputs, refs){
-  const outputs = []
   inputs.sort(compareAscending)
 
-  refs.forEach(function(ref){
-    outputs.push(
-      binaryFindThenWalk(inputs, ref)
-    )
+  refs.forEach(function(ref, index){
+    refs[index] = binaryFindThenWalk(inputs, ref)
   })
-  return outputs
+  return refs
 }
 
 // * Binary Bound
@@ -173,9 +170,10 @@ function upperBound(array, target) {
 function binaryBoundsCount(inputs, refs){
   inputs.sort(compareAscending)
 
-  return refs.map(function(ref){
-    return upperBound(inputs, ref)
+  refs.forEach(function(ref, index){
+    refs[index] = upperBound(inputs, ref)
   })
+  return refs
 }
 
 // ***************************************
