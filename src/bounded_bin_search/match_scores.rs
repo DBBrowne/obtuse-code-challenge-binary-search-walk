@@ -151,14 +151,13 @@ fn count_with_builtin(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
 }
 
 // * Partition
+use rayon::prelude::*;
 fn counts_partition(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
-  let mut output : Vec<u32> = Vec::with_capacity(refs.len());
   inputs.sort_unstable();
 
-  for r in refs{
-    output.push(inputs.partition_point(|&el| el <= r) as u32);
-  };
-  output
+  refs.par_iter().map(|r| {
+    binary_builtin_then_walk(&inputs, *r)
+  }).collect::<Vec<u32>>()
 }
 
 
@@ -201,11 +200,11 @@ struct BulkTest{
 pub fn match_scores_tests() {
   let mut rng = rand::thread_rng();
 
-  let functions:[(&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>, String); 5] = [
+  let functions:[(&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>, String); 2] = [
     (&counts_sort_walk, String::from("counts_sort_walk")),
-    (&binary_bounds_count,String::from("counts_sort_walk")),
-    (&count_find_then_walk, String::from("count_find_then_walk")),
-    (&count_with_builtin, String::from("count_with_builtin")),
+    // (&binary_bounds_count,String::from("counts_sort_walk")),
+    // (&count_find_then_walk, String::from("count_find_then_walk")),
+    // (&count_with_builtin, String::from("count_with_builtin")),
     (&counts_partition, String::from("count_partition"))
   ];
 
