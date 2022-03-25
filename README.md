@@ -36,7 +36,7 @@ counts([1,2,3], [2,4])
 #### Performance
 A summary:
 - Node does respectably, excellent given how easy it is to use.
-- Python is admirably fast with small data sets, but starts to struggle at the larger input sizes.
+- Python is passable where it can use implementations written in C.  it can keep up with the v8 complied Node as long as most of the work is being handled by those C implementations like `.sort()` and `bisect` (see [`Sort Then Walk`](https://github.com/DBBrowne/obtuse-code-challenge-fuzzy-binary-search/blob/main/Python_Solutions/nearest_binary_search.py#L13-L34) and [`Binary Insertion Point`](https://github.com/DBBrowne/obtuse-code-challenge-fuzzy-binary-search/blob/main/Python_Solutions/nearest_binary_search.py#L108-L116)). If Python itself is handling the the binary search ([`Binary S then Walk`](https://github.com/DBBrowne/obtuse-code-challenge-fuzzy-binary-search/blob/main/Python_Solutions/nearest_binary_search.py#L81-L106)) the execution times are terrible.
 - Rust is a compiled language, designed for speed, so dominates.  For a low level language, it is very easy to work with, with an excellent and extremely helpful compiler.
 > Obviously, execution speeds are hardware dependant.  
 > Trying to optimise execution time in Node, beyond choosing a better algorithm, is largely [an exercise in futility](https://gist.github.com/coolaj86/2310b00d6eebb3f752f4ca803f1423d1).  Execution times can vary widely following apparently unrelated changes in code which appear to modify how the v8 JIT decides to compile the code.
@@ -47,23 +47,23 @@ A summary:
 
 |Algo|Input Length||Python|JS / Node|Rust||
 |---|---:|---|---:|---:|---:|---:|
-|naive Count|10_000||2216ms|928ms|7ms|
-|sort then walk|10_000||3.6ms|6.0ms|0.85ms|duncanCount|
+|Naive Count|10_000||2216ms|928ms|7ms|
+|Sort Then Walk|10_000||3.6ms|6.0ms|0.85ms|duncanCount|
 |Binary S then Walk|10_000||19ms|4.2ms|0.7ms|ajCount|
-|Binary Boundary|10_000||19ms|4.0ms|0.8ms|binaryBoundsCount|
+|Binary Insertion Point|10_000||3.2ms|4.0ms|0.8ms|binaryBoundsCount|
 |||||
-|naive Count|100_000||--|~70 s|742ms|
-|sort then walk|100_000||57ms|62ms|8.6ms|
+|Naive Count|100_000||--|~70 s|742ms|
+|Sort Then Walk|100_000||57ms|62ms|8.6ms|
 |Binary S then Walk|100_000||270ms|37ms|9.7ms|
-|Binary Boundary|100_000||260ms|29.5ms|9.3ms|
+|Binary Insertion Point|100_000||44ms|29.5ms|9.3ms|
 ||||||
-|sort then walk|1_000_000||946ms|795ms|127ms|
+|Sort Then Walk|1_000_000||946ms|795ms|127ms|
 |Binary S then Walk|1_000_000||3632ms|492ms|133ms|
-|Binary Boundary|1_000_000||3632ms|407ms|130ms|
+|Binary Insertion Point|1_000_000||967ms|407ms|130ms|
 ||||||
-|sort then walk|10_000_000||11,031ms|9126ms|1711ms|
+|Sort Then Walk|10_000_000||11,031ms|9126ms|1711ms|
 |Binary S then Walk|10_000_000||46,000ms|7213ms|2700ms|
-|Binary Boundary|10_000_000||46,000ms|6080s|2710ms|
+|Binary Insertion Point|10_000_000||16,200ms|6080s|2710ms|
 ||||||
 
 
@@ -77,7 +77,7 @@ There are more workings and variations on the [JS and Python implementations](ht
 
 This was one of the first coding challenges I saw which required a bit of comp-sci knowledge, so I failed to see that this was a binary search problem.  Additionally, the input element value space (0 <= input[i] <= 1e9) being much larger than the input length space (2< i <=1e5) made a hashmap-style count solution almost as slow as the naive approach, and helped me fail to realise that there was a Binary Search solution.
 
-Many thanks to @coolaj86 ([Github](https://github.com/coolaj86) / [Twitter](https://twitter.com/coolaj86) for his help, advice, and friendly competition.  
+Many thanks to @coolaj86 ([Github](https://github.com/coolaj86) / [Twitter](https://twitter.com/coolaj86)) for his help, advice, and friendly competition.  
 Check him out on youtube, optimizing solutions here:  
 https://www.youtube.com/watch?v=0mmi44ZB2C0  
 And walking me through a better solution here:  
@@ -115,7 +115,7 @@ The "Correct" solution is to:
 >(ie returns index of nearest match to each element of inputB (walking right to find max index = max count of lower scores).
 - Pre-allocating the output array offers a significant speed up at larger input sizes.
 
-After further research, a method to continue using the binary search method to find the upper bound of matching elements exists, ofeirng the fastest solution to this problem:
+After further research, a method to continue using the binary search method to find the insertion point / upper bound of matching elements exists, offering the fastest solution to this problem:
 https://stackoverflow.com/a/41956372/15995918
 
 ```js
@@ -123,7 +123,7 @@ function binarySearch(array, pred) {
   let left = -1
   let right = array.length
   while ((1 + left) < right) {
-    // Bitwise version of Math.floor((hi-lo) / 2)
+    // Bitshift version of Math.floor((hi-lo) / 2)
     const mid = left + ((right - left) >> 1)
     if (pred(array[mid])) {
       right = mid
