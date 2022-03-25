@@ -16,6 +16,7 @@ function duncanCount(teamA, teamB) {
   let previousAIndex = 0
 
   _teamB.forEach(score => {
+    // where previousAIndex > teamA.length, the while loop ends automatically as teamA[length] === undefined, and undefined<=int === false.
     while (teamA[previousAIndex] <= score) {
       previousAIndex++
     }
@@ -26,127 +27,6 @@ function duncanCount(teamA, teamB) {
     teamB[i] = cache[score]
   })
   return teamB
-}
-
-function ajCountLeftAlloc(inputs, refs) {
-  const outputs = []
-  // starts just a little to the right
-  inputs.sort(compareAscending)
-
-  refs.forEach(function (ref) {
-    let left = 0
-    let right = inputs.length - 1
-    let i = left
-
-    for (;;) {
-      const v = inputs[i]
-      // Move to the left
-      // (guarantee that i will move left if it can)
-      if (v > ref) {
-        right = i //- 1;
-        const j = left + Math.floor((i - left) / 2)
-        if (i === j) {
-          break
-        }
-        i = j
-        continue
-      }
-
-      if (v <= ref) {
-        left = i
-        const j = i + Math.floor((right - i) / 2)
-        if (i === j) {
-          break
-        }
-        i = j
-        continue
-      }
-    }
-    while (inputs[i] === inputs[i + 1] && i < inputs.length) {
-      i += 1
-    }
-    outputs.push(i + 1)
-  })
-  return outputs
-}
-
-function binarySearchThenWalk(arr, x){
-  let left = 0
-  let right = arr.length
-  // let mid = left + Math.floor((right - left) / 2)
-
-  while (left <= right){
-    let mid = left + Math.floor((right - left) / 2)
-    
-    // Standard binary search would return mid here, if arr[mid] === x, 
-    // As we want to find the rightmost index if multiple equal values are sorted together, walk right from a  matching value until a non-matching is found.
-    if (x === arr[mid]) {
-      while (x === arr[mid + 1]){
-        mid++
-      }
-      return mid + 1
-    }
-    // If we're at the insert point for our target, return the next index
-    if (arr[mid] < x && arr[mid + 1] > x){
-      return mid + 1
-    }
-
-    if (arr[mid] < x){
-      left = mid + 1
-    } else {
-      right = mid - 1
-    }
-  }
-  // target is not found, so return 
-  return right + 1
-}
-function ajCount(inputs, refs){
-  const outputs = []
-  inputs.sort(compareAscending)
-
-  refs.forEach(function(ref){
-    outputs.push(
-      binarySearchThenWalk(inputs, ref)
-    )
-  })
-  return outputs
-}
-
-// * Binary Search with negative insertion index if not found
-// https://stackoverflow.com/a/29018745/15995918
-function binaryFindOrInsertionIndex(arr, target, compareFn = (t, el) => t - el) {
-  // Returns 0 if target found at arr[0].  
-  // Returns -(indexToInsert) if target is not found
-  var left = 0
-  var right = arr.length - 1
-  while (left <= right) {
-    // Bitshift version of Math.floor((hi-lo) / 2)
-    var mid = left + ((right - left) >> 1)
-    var cmp = compareFn(target, arr[mid])
-    if (cmp > 0) {
-      left = mid + 1
-    } else if (cmp < 0) {
-      right = mid - 1
-    } else {
-      return mid
-    }
-  }
-  return -right - 1
-}
-function binaryFindThenWalk(arr, target){
-  let index = binaryFindOrInsertionIndex(arr, target)
-  if (index < 0) return -index
-
-  while (target === arr[index]) index++
-  return index
-}
-function ajCountExtended(inputs, refs){
-  inputs.sort(compareAscending)
-
-  refs.forEach(function(ref, index){
-    refs[index] = binaryFindThenWalk(inputs, ref)
-  })
-  return refs
 }
 
 // * Binary Bound
@@ -207,8 +87,6 @@ const tests = [
 
 const functions = [
   duncanCount,
-  ajCount,
-  ajCountExtended,
   binaryBoundsCount
 ]
 
@@ -267,9 +145,6 @@ function scoresGenerator(size) {
 
 const functionsToTime = [
   duncanCount,
-  ajCountLeftAlloc,
-  ajCount,
-  ajCountExtended,
   binaryBoundsCount
 ]
 

@@ -33,78 +33,6 @@ def counts_sort_walk(teamA, teamB):
 
     return teamB
 
-# * Binary Search with negative insertion index if not found
-# https://stackoverflow.com/a/29018745/15995918
-def binary_find_or_insertion_index(
-    arr,
-    target,
-    compare = lambda t, el: t - el
-    ):
-    '''
-    Returns 0 if target found at arr[0].  
-    Returns -(indexToInsertAt) if target is not found
-    '''
-    left = 0
-    right = len(arr)-1
-    while left <= right:
-        # Bitshift version of Math.floor((hi-lo) / 2)
-        mid = left + ((right - left) >> 1)
-        cmp = compare(target, arr[mid])
-        if cmp>0 :
-            left = mid + 1
-        elif cmp<0: 
-            right = mid -1
-        else:
-            return mid
-    
-    return -right -1
-
-def binary_find_then_walk(arr, target):
-    index = binary_find_or_insertion_index(arr, target)
-
-    if index < 0 :
-        return -index
-    
-    while target == arr[index]:
-        index = index +1
-    
-    return index
-
-def aj_count_extended(inputs, refs):
-    inputs.sort()
-
-    for index, ref in enumerate(refs):
-        refs[index] = binary_find_then_walk(inputs, ref)
-
-    return refs
-
-# * Binary Bound
-# https://stackoverflow.com/a/41956372/15995918
-def binary_search(array, pred):
-    left = -1
-    right = len(array)
-
-    while((1+left) < right):
-        # Bitshift version of Math.floor((hi-lo) / 2)
-        mid = left + ((right - left) >> 1)
-        if pred(array[mid]):
-            right = mid
-        else:
-            left = mid
-
-    return right
-
-def upper_bound(array, target):
-    return binary_search(array, lambda j: target < j)
-
-def binary_bounds_count(inputs, refs):
-    inputs.sort()
-
-    for index, ref in enumerate(refs):
-        refs[index] = upper_bound(inputs, ref)
-
-    return refs
-
 #* Python bisect
 # bisect = bisect_right, which returns rightmost insertion point for the search target in the array.  Bisect is implemented in C.
 import bisect
@@ -147,8 +75,6 @@ tests = [
 functions_test = [
     counts,
     counts_sort_walk,
-    binary_bounds_count,
-    aj_count_extended,
     count_bisect
 ]
 
@@ -215,8 +141,6 @@ bench = [
 
 functions = [
     counts_sort_walk,
-    binary_bounds_count,
-    aj_count_extended,
     count_bisect
 ]
 
