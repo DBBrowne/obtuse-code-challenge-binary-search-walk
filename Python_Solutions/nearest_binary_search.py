@@ -99,13 +99,22 @@ def upper_bound(array, target):
 
 def binary_bounds_count(inputs, refs):
     inputs.sort()
-    outputs = []
 
-    for score in refs:
-        outputs.push(upper_bound(inputs, score))
+    for index, ref in enumerate(refs):
+        refs[index] = upper_bound(inputs, ref)
 
-    return outputs
+    return refs
 
+#* Python bisect
+# bisect = bisect_right, which returns rightmost insertion point for the search target in the array.  Bisect is implemented in C.
+import bisect
+def count_bisect(inputs, refs):
+    inputs.sort()
+
+    for index, ref in enumerate(refs):
+        refs[index] = bisect.bisect(inputs, ref)
+
+    return refs
 
 # ************************************************
 # **** Testing
@@ -139,7 +148,8 @@ functions_test = [
     counts,
     counts_sort_walk,
     binary_bounds_count,
-    aj_count_extended
+    aj_count_extended,
+    count_bisect
 ]
 
 for function in functions_test:
@@ -206,7 +216,8 @@ bench = [
 functions = [
     counts_sort_walk,
     binary_bounds_count,
-    aj_count_extended
+    aj_count_extended,
+    count_bisect
 ]
 
 print('')
