@@ -156,7 +156,7 @@ fn counts_partition(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
   inputs.sort_unstable();
 
   for r in refs{
-    output.push(inputs.partition_point(|&el| el <= r) as u32)
+    output.push(inputs.partition_point(|&el| el <= r) as u32);
   };
   output
 }
@@ -201,19 +201,12 @@ struct BulkTest{
 pub fn match_scores_tests() {
   let mut rng = rand::thread_rng();
 
-  let functions:[&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>; 5] = [
-    &counts_sort_walk,
-    &binary_bounds_count,
-    &count_find_then_walk,
-    &count_with_builtin,
-    &counts_partition
-  ];
-  let function_labels: [String;5] = [
-    String::from("counts_sort_walk"),
-    String::from("count_binary_bounds"),
-    String::from("count_find_then_walk"),
-    String::from("count_with_builtin"),
-    String::from("count_partition"),
+  let functions:[(&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>, String); 5] = [
+    (&counts_sort_walk, String::from("counts_sort_walk")),
+    (&binary_bounds_count,String::from("counts_sort_walk")),
+    (&count_find_then_walk, String::from("count_find_then_walk")),
+    (&count_with_builtin, String::from("count_with_builtin")),
+    (&counts_partition, String::from("count_partition"))
   ];
 
   let scenarios:Vec<TestScenario> = vec![
@@ -279,8 +272,8 @@ pub fn match_scores_tests() {
 
   for scenario in scenarios{
     println!("Asserting: {:?}, {:?}, Expected: {:?}", scenario.inputs, scenario.refs, scenario.expected);
-    for function in functions{
-      assert_eq!(function(scenario.inputs.to_vec(), scenario.refs.to_vec()), scenario.expected);
+    for func in &functions{
+      assert_eq!(func.0(scenario.inputs.to_vec(), scenario.refs.to_vec()), scenario.expected);
     }
   }
   println!();
@@ -310,12 +303,12 @@ pub fn match_scores_tests() {
     let inputs = scores_generator(scenario.inputs);
     let refs = scores_generator(scenario.refs);
 
-    for (index, func) in functions.iter().enumerate() {
+    for func in &functions {
       timer(
-        &func,
+        &func.0,
         inputs.to_vec(),
         refs.to_vec(),
-        String::from(&function_labels[index]),
+        String::from(&func.1),
       )
     }
   }
