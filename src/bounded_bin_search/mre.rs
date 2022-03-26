@@ -34,6 +34,20 @@ fn counts_sort_walk(mut inputs: Vec<u32>, mut refs:Vec<u32>)->Vec<u32>{
 fn counts_partition_branch_pred_issue(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
   let mut output : Vec<u32> = Vec::with_capacity(refs.len());
   inputs.sort_unstable();
+
+  for r in refs{
+    output.push(inputs.partition_point(|&el| el <= r) as u32);
+  };
+  output
+}
+
+
+
+// * Partition
+// Obviously slower than counts_sort_walk, because it's doing all the same sorting and caching, but then also doing a binary search
+fn counts_partition(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
+  let mut output : Vec<u32> = Vec::with_capacity(refs.len());
+  inputs.sort_unstable();
   let mut _refs = refs.to_vec();
   _refs.sort_unstable();
 
@@ -49,24 +63,66 @@ fn counts_partition_branch_pred_issue(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<
   output
 }
 
-// * Partition
-fn counts_partition(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
-  let mut output : Vec<u32> = Vec::with_capacity(refs.len());
+fn binary_upper_bound_u32(
+  arr:&Vec<u32>, 
+  target: u32
+)->u32{
+  let mut left:i32 = -1;
+  let mut right:i32 = arr.len() as i32;
+  while (1+left) < right {
+    // Bitshift version of Math.floor((hi-lo) / 2)
+    let distance_to_mid = right-left >> 1;
+    let mid: i32 = left + distance_to_mid;
+    let cmd = ((target - arr[mid as usize]) >> 31) as i32;
+    // println!("{} {} {} {} ", cmd,!cmd, !cmd+2, !(cmd-1));
+    // if cmd >0 {
+      right -= distance_to_mid*cmd;
+    // } else {
+      left += distance_to_mid*(!cmd+2);
+    // }
+  }
+  right as u32
+}
+fn counts_branchless(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
   inputs.sort_unstable();
-  let mut _refs = refs.to_vec();
-  _refs.sort_unstable();
 
-  let mut cache = HashMap::new();
+  refs.into_iter().map(|r| {
+    binary_upper_bound_u32(&inputs, r)
+  }).collect::<Vec<u32>>()
+}
 
-  for r in _refs{
-    // Obviously slower than counts_sort_walk, because it's doing all the same sorting and caching, but then also doing a binary search
-    cache.insert(r,inputs.partition_point(|&el| el <= r) as u32);
-  };
-  
-  for r in refs{
-    output.push(cache[&r]);
-  };
-  output
+// * Binary Bound
+// https://stackoverflow.com/a/41956372/15995918
+fn binary_search_old(
+  arr:&Vec<u32>, 
+  pred: &dyn Fn(u32)->bool,
+)->usize{
+  let mut left:i32 = -1;
+  let mut right:i32 = arr.len() as i32;
+  while (1+left) < right {
+    // Bitshift version of Math.floor((hi-lo) / 2)
+    let mid: i32 = left + ((right -left) >> 1);
+    if pred(arr[mid as usize]) {
+      right = mid
+    } else {
+      left = mid
+    }
+  }
+  right as usize
+}
+fn upper_bound_old(arr: &Vec<u32>, target:u32)->usize{
+  let predicate = |j|{target < j};
+  binary_search_old(
+    &arr, 
+    &predicate
+  )
+}
+fn binary_bounds_count_old(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
+  inputs.sort_unstable();
+
+  refs.into_iter().map(|r| {
+    upper_bound_old(&inputs, r)  as u32
+  }).collect::<Vec<u32>>()
 }
 
 // ****************************************************
@@ -106,10 +162,11 @@ struct BulkTest{
 }
 
 pub fn compare_arrays() {
-  let functions:[(&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>, String); 3] = [
+  let functions:[(&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>, String); 4] = [
     (&counts_sort_walk, String::from("counts_sort_walk")),
-    (&counts_partition, String::from("count_partition")),
-    (&counts_partition_branch_pred_issue, String::from("count_partition with branch prediction issue")),
+    (&counts_partition, String::from("counts_partition")),
+    (&counts_partition_branch_pred_issue, String::from("counts_partition with branch prediction issue")),
+    (&counts_branchless, String::from("counts_branchless"))
   ];
 
   let scenarios = vec![
@@ -167,7 +224,7 @@ pub fn compare_arrays() {
     let mut inputs = scores_generator(scenario.inputs);
     let refs = scores_generator(scenario.refs);
 
-    inputs.sort();
+    // inputs.sort();
     // refs.sort();
 
     for func in &functions {
