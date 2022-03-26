@@ -189,4 +189,4 @@ This whole app is a test!
 
 ### Known Issues
 
-- [Branch prediction failures](https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array) lead to very slow execution for binary the binary search approach.  A viable workaround would be useful knowledge.
+- [Branch prediction failures](https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array) lead to very slow execution for the binary search approach.  A viable workaround would be useful knowledge.
