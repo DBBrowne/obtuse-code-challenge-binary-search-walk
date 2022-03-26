@@ -161,6 +161,44 @@ fn counts_partition(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
   output
 }
 
+// * branchless binary search for upper bound
+fn binary_upper_branchless_u32(
+  arr:&Vec<u32>, 
+  target: u32
+)->u32{
+  let mut left:i32 = -1;
+  let mut right:i32 = arr.len() as i32;
+  while (1+left) < right {
+    // Bitshift version of Math.floor((hi-lo) / 2)
+    let distance_to_mid = right-left >> 1;
+    let mid: i32 = left + distance_to_mid;
+    // bit shift to booloan 0 or 1
+    let compare = ((target - arr[mid as usize]) >> 31) as i32;
+    // !compare+2 inverts the binary compare, allowing us to modify right or left as if behind a boolean branch, without creating the branch prediction.  This works out slower than just accepting the branch prediction errors though!
+    // println!("{} {}", compare, !compare+2);
+    right -= distance_to_mid*compare;     // if ((target - arr[mid]) > 0) { right = mid}
+    left += distance_to_mid*(!compare+2); // if ((target - arr[mid]) < 0) { left = mid}
+  }
+  right as u32
+}
+fn counts_branchless(mut inputs:Vec<u32>, refs:Vec<u32>)->Vec<u32>{
+  inputs.sort_unstable();
+
+  refs.into_iter().map(|r| {
+    binary_upper_branchless_u32(&inputs, r)
+  }).collect::<Vec<u32>>()
+}
+
+// * Multithreaded partition
+use rayon::prelude::*;
+fn counts_partition_multithread(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
+  inputs.par_sort_unstable();
+
+  refs.par_iter().map(|r| {
+    inputs.partition_point(|&el| el <= *r) as u32
+  }).collect::<Vec<u32>>()
+}
+
 
 // ****************************************************
 // *** Tests
@@ -201,12 +239,14 @@ struct BulkTest{
 pub fn match_scores_tests() {
   let mut rng = rand::thread_rng();
 
-  let functions:[(&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>, String); 5] = [
+  let functions:[(&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>, String); 7] = [
     (&counts_sort_walk, String::from("counts_sort_walk")),
     (&binary_bounds_count,String::from("binary_bounds_count")),
     (&count_find_then_walk, String::from("count_find_then_walk")),
     (&count_with_builtin, String::from("count_with_builtin")),
-    (&counts_partition, String::from("count_partition"))
+    (&counts_partition, String::from("count_partition")),
+    (&counts_branchless, String::from("counts_branchless")),
+    (&counts_partition_multithread, String::from("counts_partition_multithread"))
   ];
 
   let scenarios:Vec<TestScenario> = vec![
