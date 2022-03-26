@@ -203,7 +203,7 @@ pub fn match_scores_tests() {
 
   let functions:[(&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>, String); 5] = [
     (&counts_sort_walk, String::from("counts_sort_walk")),
-    (&binary_bounds_count,String::from("counts_sort_walk")),
+    (&binary_bounds_count,String::from("binary_bounds_count")),
     (&count_find_then_walk, String::from("count_find_then_walk")),
     (&count_with_builtin, String::from("count_with_builtin")),
     (&counts_partition, String::from("count_partition"))
