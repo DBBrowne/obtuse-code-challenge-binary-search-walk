@@ -29,18 +29,45 @@ fn counts_sort_walk(mut inputs: Vec<u32>, mut refs:Vec<u32>)->Vec<u32>{
   refs
 }
 
+// * Partition Branch prediciton issue
+// https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array/11227902#11227902
+fn counts_partition_branch_pred_issue(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
+  let mut output : Vec<u32> = Vec::with_capacity(refs.len());
+  inputs.sort_unstable();
+  let mut _refs = refs.to_vec();
+  _refs.sort_unstable();
+
+  let mut cache = HashMap::new();
+
+  for r in _refs{
+    cache.insert(r,inputs.partition_point(|&el| el <= r) as u32);
+  };
+  
+  for r in refs{
+    output.push(cache[&r]);
+  };
+  output
+}
 
 // * Partition
 fn counts_partition(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
   let mut output : Vec<u32> = Vec::with_capacity(refs.len());
   inputs.sort_unstable();
+  let mut _refs = refs.to_vec();
+  _refs.sort_unstable();
 
+  let mut cache = HashMap::new();
+
+  for r in _refs{
+    // Obviously slower than counts_sort_walk, because it's doing all the same sorting and caching, but then also doing a binary search
+    cache.insert(r,inputs.partition_point(|&el| el <= r) as u32);
+  };
+  
   for r in refs{
-    output.push(inputs.partition_point(|&el| el <= r) as u32);
+    output.push(cache[&r]);
   };
   output
 }
-
 
 // ****************************************************
 // *** Tests
@@ -79,9 +106,10 @@ struct BulkTest{
 }
 
 pub fn compare_arrays() {
-  let functions:[(&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>, String); 2] = [
+  let functions:[(&dyn Fn(Vec<u32>,Vec<u32>)-> Vec<u32>, String); 3] = [
     (&counts_sort_walk, String::from("counts_sort_walk")),
-    (&counts_partition, String::from("count_partition"))
+    (&counts_partition, String::from("count_partition")),
+    (&counts_partition_branch_pred_issue, String::from("count_partition with branch prediction issue")),
   ];
 
   let scenarios = vec![
@@ -136,8 +164,11 @@ pub fn compare_arrays() {
     println!();
     println!("{:?}",scenario);
 
-    let inputs = scores_generator(scenario.inputs);
+    let mut inputs = scores_generator(scenario.inputs);
     let refs = scores_generator(scenario.refs);
+
+    inputs.sort();
+    // refs.sort();
 
     for func in &functions {
       timer(
