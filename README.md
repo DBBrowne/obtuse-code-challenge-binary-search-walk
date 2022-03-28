@@ -183,6 +183,20 @@ node ./JavaScript_Solutions/nearestBinSearch.js
 python3 ./Python_Solutions/nearest_binary_search.py
 ```
 
+#### Go
+
+```console
+./Golang_Solutions/obtuse_interview_go
+```
+
+Or re-build with 
+```console
+pushd ./Golang_Solutions
+go build
+
+./obtuse_interview_go
+```
+
 ### Running Tests
 
 This whole app is a test!
