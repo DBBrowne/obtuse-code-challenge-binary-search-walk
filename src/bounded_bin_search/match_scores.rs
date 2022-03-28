@@ -162,6 +162,7 @@ fn counts_partition(mut inputs:Vec<u32>, refs: Vec<u32>)->Vec<u32>{
 }
 
 // * branchless binary search for upper bound
+// https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array
 fn binary_upper_branchless_u32(
   arr:&Vec<u32>, 
   target: u32
@@ -169,12 +170,12 @@ fn binary_upper_branchless_u32(
   let mut left:i32 = -1;
   let mut right:i32 = arr.len() as i32;
   while (1+left) < right {
-    // Bitshift version of Math.floor((hi-lo) / 2)
+    // Bitshift equivalent of Math.floor((hi-lo) / 2)
     let distance_to_mid = right-left >> 1;
     let mid: i32 = left + distance_to_mid;
     // bit shift to booloan 0 or 1
     let compare = ((target - arr[mid as usize]) >> 31) as i32;
-    // !compare+2 inverts the binary compare, allowing us to modify right or left as if behind a boolean branch, without creating the branch prediction.  This works out slower than just accepting the branch prediction errors though!
+    // !compare+2 inverts the binary compare, allowing us to modify right or left as if behind a boolean branch, without creating the branch prediction.  The extra assignments and calculations are slower than just accepting the branch prediction errors though!
     // println!("{} {}", compare, !compare+2);
     right -= distance_to_mid*compare;     // if ((target - arr[mid]) > 0) { right = mid}
     left += distance_to_mid*(!compare+2); // if ((target - arr[mid]) < 0) { left = mid}
