@@ -31,24 +31,47 @@ func counts(inputs []int, refs []int) []int {
 	return output
 }
 
+func countsSortThenWalk(inputs []int, refs []int) []int {
+	outputs := make([]int, len(refs))
+	_refs:= make([]int, len(refs))
+	previousInputIndex:= 0
+	cache := make(map[int]int)
 
+	copy(_refs, refs)
 
-func binBoundarySearch(inputs []int, refs []int) []int {
-	output := []int {}
+	sort.Ints(inputs)
+	sort.Ints(_refs)
+
+	for i:=0; i<len(_refs);i++{
+		ref := _refs[i]
+		for (
+			len(inputs) > previousInputIndex &&
+			inputs[previousInputIndex] <= _refs[i]){
+
+			previousInputIndex ++
+		}
+		cache[ref] = previousInputIndex
+	}
+
+	for i:=0; i<len(refs);i++{
+		outputs[i] = cache[refs[i]]
+	}
+	return outputs
+}
+
+func countsBoundarySearch(inputs []int, refs []int) []int {
+	output := make([]int, len(refs))
 	
 	sort.Ints(inputs)
 
 	for i:=0; i<len(refs); i++ {
-		output = append(
-			output,
-			sort.SearchInts(inputs, refs[i]+1),
-		)
+		output[i] = sort.SearchInts(inputs, refs[i]+1)
 	}
 
 	return output
 }
 
-func binBoundarySearchMulti(inputs []int, refs []int) []int {
+func countsBoundarySearchMulti(inputs []int, refs []int) []int {
 	output := make([]int, len(refs))
 
 	var wg sync.WaitGroup
@@ -144,8 +167,9 @@ func main() {
 
 	functionsToTest := []func(inputs []int, refs []int)[]int {
 		counts,
-		binBoundarySearch,
-		binBoundarySearchMulti,
+		countsSortThenWalk,
+		countsBoundarySearch,
+		countsBoundarySearchMulti,
 	}
 
 	for i:=0; i<len(testCases);i++ {
@@ -195,8 +219,9 @@ func main() {
 	}
 
 	functionsToBench := []func(inputs []int, refs []int)[]int {
-		binBoundarySearch,
-		binBoundarySearchMulti,
+		countsSortThenWalk,
+		countsBoundarySearch,
+		countsBoundarySearchMulti,
 	}
 
 	fmt.Println("1,000")

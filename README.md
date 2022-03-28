@@ -48,26 +48,28 @@ A summary:
 
   - HOWEVER.  The binary Search based solution opens the door to multi-threading. Rust supports race-safe multi-threading via the Rayon Crate.  By multithreading the binary searches, we get execution times down to 500ms at the 10m input length level.  Multi-thread the `inputs` sort, and we get to 350ms when both inputs have length of 10m.
 
+- Go is a reasonable balance of usability and speed.  There may well be a lot of remaining on the table however, especially as the multithreading is not currently offering the expected acceleration.
+
 |Algo|Input Length||Python|Go|JS / Node|Rust||
 |---|---:|---|---:|---:|---:|---:|---:|
 |Naive Count|10_000||2216ms|44ms|928ms|7ms|
-|Sort Then Walk|10_000||3.6ms||6.0ms|0.85ms|duncanCount|
+|Sort Then Walk|10_000||3.6ms|2.5ms|6.0ms|0.85ms|duncanCount|
 |Binary S then Walk|10_000||19ms||4.2ms|0.7ms|ajCount|
 |Binary Insertion Point|10_000||3.2ms|1.6ms|4.0ms|0.8ms|binaryBoundsCount|
 |Binary Insertion Multi|10_000||---|3.45ms|---|0.23ms|counts_partition_multithread|
 ||||||
 |Naive Count|100_000||--||~70 s|742ms|
-|Sort Then Walk|100_000||57ms||62ms|8.6ms|
+|Sort Then Walk|100_000||57ms|30.2ms|62ms|8.6ms|
 |Binary S then Walk|100_000||270ms||37ms|9.7ms|
 |Binary Insertion Point|100_000||44ms|22ms|29.5ms|9.3ms|
 |Binary Insertion Multi|100_000||---|31ms|---|1.4ms||
 |||||||
-|Sort Then Walk|1_000_000||946ms||795ms|127ms|
+|Sort Then Walk|1_000_000||946ms|397ms|795ms|127ms|
 |Binary S then Walk|1_000_000||3632ms||492ms|133ms|
 |Binary Insertion Point|1_000_000||967ms|279ms|407ms|130ms|
 |Binary Insertion Multi|1_000_000||---|329ms|---|16ms||
 |||||||
-|Sort Then Walk|10_000_000||11,031ms||9126ms|1711ms|
+|Sort Then Walk|10_000_000||11,031ms|4825ms|9126ms|1711ms|
 |Binary S then Walk|10_000_000||46,000ms||7213ms|2700ms|
 |Binary Insertion Point|10_000_000||16,200ms|4794ms|6080s|2710ms|
 |Binary Insertion Multi|10_000_000||---|3566ms|---|348ms||
@@ -204,3 +206,6 @@ This whole app is a test!
 ### Known Issues
 
 - [Branch prediction failures](https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array) lead to very slow execution for the binary search approach.  A viable workaround would be useful knowledge.
+
+- Go multithreading runs slower than non-multithreaded.
+- Go changing order of functions in benchmarks affects execution times, which it should not.
