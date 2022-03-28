@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	// "testing"
+	"math/rand"
 	"reflect"
 	"runtime"
+	"sort"
 	"strings"
-	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -31,16 +32,64 @@ func counts(inputs []int, refs []int) []int {
 }
 
 
+
+func binBoundarySearch(inputs []int, refs []int) []int {
+	output := []int {}
+	
+	sort.Ints(inputs)
+
+	for i:=0; i<len(refs); i++ {
+		output = append(
+			output,
+			sort.SearchInts(inputs, refs[i]+1),
+		)
+	}
+
+	return output
+}
+
+func binBoundarySearchMulti(inputs []int, refs []int) []int {
+	output := make([]int, len(refs))
+
+	var wg sync.WaitGroup
+	wg.Add(len(refs))
+	
+	sort.Ints(inputs)
+
+	for i:=0; i<len(refs); i++ {
+		go func(i int){
+			defer wg.Done()
+			output[i] = sort.SearchInts(inputs, refs[i]+1)
+		}(i)
+	}
+
+	wg.Wait()
+
+	return output
+}
+
+
 // ********************************
 // *** Tests
 
+func equalSlice(a, b []int) bool {
+    if len(a) != len(b) {
+        return false
+    }
+    for i, v := range a {
+        if v != b[i] {
+            return false
+        }
+    }
+    return true
+}
 
-func GetFunctionName(temp interface{}) string {
+func getFunctionName(temp interface{}) string {
     strs := strings.Split((runtime.FuncForPC(reflect.ValueOf(temp).Pointer()).Name()), ".")
     return strs[len(strs)-1]
 }
 
-func generate_scores(length int) []int{
+func generateScores(length int) []int{
 	scores := []int {}
 
 	for i:=0; i<length; i++{
@@ -54,14 +103,15 @@ func timeTrack(start time.Time, name string) {
     fmt.Println(name, ":", elapsed/1000,"ms")
 }
 
-func timer(
+func timeFunction(
 	fn func(inputs []int, refs []int) []int,
 	inputs, refs []int,
 	){
-		defer timeTrack(time.Now(), GetFunctionName(fn))
+		defer timeTrack(time.Now(), getFunctionName(fn))
 
 		fn(inputs, refs)
 	}
+
 
 func main() {
 	testCases := [][][]int {
@@ -92,18 +142,20 @@ func main() {
 		},		
 	}
 
-	functions := []func(inputs []int, refs []int)[]int {
+	functionsToTest := []func(inputs []int, refs []int)[]int {
 		counts,
+		binBoundarySearch,
+		binBoundarySearchMulti,
 	}
 
 	for i:=0; i<len(testCases);i++ {
 		fmt.Println("Asserting: ", testCases[i][0], testCases[i][1], "Expected:", testCases[i][2])
 
-		for j:=0;j<len(functions);j++  {
-			output := functions[j](testCases[i][0], testCases[i][1])
-			assert:= Equal(testCases[i][2], output)
+		for j:=0;j<len(functionsToTest);j++  {
+			output := functionsToTest[j](testCases[i][0], testCases[i][1])
+			assert:= equalSlice(testCases[i][2], output)
 			if !assert {
-				fmt.Println("Fail. ", GetFunctionName(functions[j]) ,"Output: ", output)
+				fmt.Println("Fail. ", getFunctionName(functionsToTest[j]) ,"Output: ", output)
 			}
 		}
 	}
@@ -142,32 +194,30 @@ func main() {
 		},
 	}
 
+	functionsToBench := []func(inputs []int, refs []int)[]int {
+		binBoundarySearch,
+		binBoundarySearchMulti,
+	}
+
 	fmt.Println("1,000")
-	timer(counts, generate_scores(1_000), generate_scores(1_000))
+	timeFunction(counts, generateScores(1_000), generateScores(1_000))
 	fmt.Println("10,000")
-	timer(counts, generate_scores(10_000), generate_scores(10_000))
+	timeFunction(counts, generateScores(10_000), generateScores(10_000))
 
-	
+	for i:=0; i<len(benchCases); i++ {
+		println()
+		println(benchCases[i][0], benchCases[i][1])
+		inputs := generateScores(benchCases[i][0])
+		refs := generateScores(benchCases[i][1])
 
-}
+		for j:=0; j<len(functionsToBench); j++ {
+			_inputs := make([]int, benchCases[i][0])
+			_refs := make([]int, benchCases[i][1])
 
-func Equal(a, b []int) bool {
-    if len(a) != len(b) {
-        return false
-    }
-    for i, v := range a {
-        if v != b[i] {
-            return false
-        }
-    }
-    return true
-}
+			copy(_inputs, inputs)
+			copy(_refs, refs)
 
-func testCounts(){
-	output := counts([]int {1, 2, 4, 4}, []int {3, 4})
-
-	assert := Equal([]int{2,4}, output)
-	if !assert {
-		fmt.Println("Fail.  Output: ", output)
+			timeFunction(functionsToBench[j], _inputs, _refs)
+		}
 	}
 }
