@@ -48,7 +48,10 @@ A summary:
 
   - HOWEVER.  The binary Search based solution opens the door to multi-threading. Rust supports race-safe multi-threading via the Rayon Crate.  By multithreading the binary searches, we get execution times down to 500ms at the 10m input length level.  Multi-thread the `inputs` sort, and we get to 350ms when both inputs have length of 10m.
 
+
 - Go is a reasonable balance of usability and speed.  There may well be a lot of remaining on the table however, especially as the multithreading is not currently offering the expected acceleration.
+  - Goroutine setup overhead is quite large.  Perhaps a limited number of goroutines, each assigned a portion of the search work, would be more optimal.
+  - Learning how to use channels may be the appropriate route forwards here.
 
 |Algo|Input Length||Python|Go|JS / Node|Rust||
 |---|---:|---|---:|---:|---:|---:|---:|
@@ -85,6 +88,7 @@ Performance became an interesting part of this problem and, as I had already bui
 - [JS/Node](https://github.com/DBBrowne/obtuse-code-challenge-fuzzy-binary-search/blob/main/JavaScript_Solutions/nearestBinSearch.js)
 - [Python](https://github.com/DBBrowne/obtuse-code-challenge-fuzzy-binary-search/blob/main/Python_Solutions/nearest_binary_search.py)
 - [Rust](https://github.com/DBBrowne/obtuse-code-challenge-fuzzy-binary-search)
+- [Go](https://github.com/DBBrowne/obtuse-code-challenge-fuzzy-binary-search/blob/main/Golang_Solutions/main.go)
 
 There are more workings and variations on the [JS and Python implementations](https://github.com/DBBrowne/code-challenges-public/blob/main/other/fuzzybinarysearch/) in my general code-challenges repo.
 
@@ -207,5 +211,7 @@ This whole app is a test!
 
 - [Branch prediction failures](https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array) lead to very slow execution for the binary search approach.  A viable workaround would be useful knowledge.
 
-- Go multithreading runs slower than non-multithreaded.
+- Go multithreading runs slower than non-multithreaded. Goroutine setup overhead is quite large.  Need to spread operations over a limited number of threads?
 - Go changing order of functions in benchmarks affects execution times, which it should not.
+
+- Julia solution?
