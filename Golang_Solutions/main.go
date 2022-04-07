@@ -70,20 +70,32 @@ func countsBoundarySearch(inputs []int, refs []int) []int {
 
 	return output
 }
-
+var threads = 10
 func countsBoundarySearchMulti(inputs []int, refs []int) []int {
 	output := make([]int, len(refs))
 
 	var wg sync.WaitGroup
-	wg.Add(len(refs))
+	wg.Add(threads)
 	
 	sort.Ints(inputs)
 
-	for i:=0; i<len(refs); i++ {
-		go func(i int){
+	length := len(refs)
+	indexesPerThread := int(length / threads)
+
+
+	for i:=0; i<threads; i++ {
+		start := i * indexesPerThread
+		end := (i+1)*indexesPerThread
+
+		if i == threads-1 {
+			end = length
+		}
+		go func(start int, end int){
 			defer wg.Done()
-			output[i] = sort.SearchInts(inputs, refs[i]+1)
-		}(i)
+			for i:=start; i<end; i++{
+				output[i] = sort.SearchInts(inputs, refs[i]+1)
+			}
+		}(start, end)
 	}
 
 	wg.Wait()
