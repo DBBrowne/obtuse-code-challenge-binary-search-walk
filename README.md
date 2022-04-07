@@ -49,9 +49,10 @@ A summary:
   - HOWEVER.  The binary Search based solution opens the door to multi-threading. Rust supports race-safe multi-threading via the Rayon Crate.  By multithreading the binary searches, we get execution times down to 500ms at the 10m input length level.  Multi-thread the `inputs` sort, and we get to 350ms when both inputs have length of 10m.
 
 
-- Go is a reasonable balance of usability and speed.  There may well be a lot of remaining on the table however, especially as the multithreading is not currently offering the expected acceleration.
-  - Goroutine setup overhead is quite large.  Perhaps a limited number of goroutines, each assigned a portion of the search work, would be more optimal.
-  - Learning how to use channels may be the appropriate route forwards here.
+- Go is a reasonable balance of usability and speed.  
+  - Goroutine setup overhead is quite large, and requires more thought than Rusts's approach of simply replacing a call to an iterator with a parallel_iterator.
+  - Running 10 concurrent goroutines offers a substantial speedup.  Whilst noticeably faster than node, go still lags a long way behind Rust, especially when multithreaded.
+  - Learning how to use channels may be the idiomatic approach here.
 
 |Algo|Input Length||Python|Go|JS / Node|Rust||
 |---|---:|---|---:|---:|---:|---:|---:|
@@ -59,23 +60,23 @@ A summary:
 |Sort Then Walk|10_000||3.6ms|2.5ms|6.0ms|0.85ms|duncanCount|
 |Binary S then Walk|10_000||19ms||4.2ms|0.7ms|ajCount|
 |Binary Insertion Point|10_000||3.2ms|1.6ms|4.0ms|0.8ms|binaryBoundsCount|
-|Binary Insertion Multi|10_000||---|3.45ms|---|0.23ms|counts_partition_multithread|
+|Binary Insertion Multi|10_000||---|1.1ms|---|0.23ms|counts_partition_multithread|
 ||||||
 |Naive Count|100_000||--||~70 s|742ms|
 |Sort Then Walk|100_000||57ms|30.2ms|62ms|8.6ms|
 |Binary S then Walk|100_000||270ms||37ms|9.7ms|
 |Binary Insertion Point|100_000||44ms|22ms|29.5ms|9.3ms|
-|Binary Insertion Multi|100_000||---|31ms|---|1.4ms||
+|Binary Insertion Multi|100_000||---|11.8ms|---|1.4ms||
 |||||||
 |Sort Then Walk|1_000_000||946ms|397ms|795ms|127ms|
 |Binary S then Walk|1_000_000||3632ms||492ms|133ms|
 |Binary Insertion Point|1_000_000||967ms|279ms|407ms|130ms|
-|Binary Insertion Multi|1_000_000||---|329ms|---|16ms||
+|Binary Insertion Multi|1_000_000||---|140ms|---|16ms||
 |||||||
 |Sort Then Walk|10_000_000||11,031ms|4825ms|9126ms|1711ms|
 |Binary S then Walk|10_000_000||46,000ms||7213ms|2700ms|
 |Binary Insertion Point|10_000_000||16,200ms|4794ms|6080s|2710ms|
-|Binary Insertion Multi|10_000_000||---|3566ms|---|348ms||
+|Binary Insertion Multi|10_000_000||---|1825ms|---|348ms||
 |||||||
 
 > Obviously, execution times are hardware dependant.  
@@ -211,7 +212,4 @@ This whole app is a test!
 
 - [Branch prediction failures](https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array) lead to very slow execution for the binary search approach.  A viable workaround would be useful knowledge.
 
-- Go multithreading runs slower than non-multithreaded. Goroutine setup overhead is quite large.  Need to spread operations over a limited number of threads?
-- Go changing order of functions in benchmarks affects execution times, which it should not.
-
-- Julia solution?
+- TODO: Julia solution?  - Looks like an interesting balance of dynamic typing and compiled performance.
